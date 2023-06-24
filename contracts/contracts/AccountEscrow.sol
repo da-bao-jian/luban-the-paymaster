@@ -46,6 +46,7 @@ contract AccountEscrow is IMessageRecipient {
   * to reconstruct the signer (ie signer == target)
   */
     mapping(address => Escrow) accountInfo;
+    mapping(address => bool) entryPoint;
 
     struct Escrow {
         uint256 freezeStart;
@@ -59,6 +60,7 @@ contract AccountEscrow is IMessageRecipient {
         uint256 timestamp;
         uint256 assetAmount;
         bytes32 domainId;
+        bytes32 hashId; // tba for contenuity challenging
         address from;
         address asset;
     }
@@ -83,10 +85,21 @@ contract AccountEscrow is IMessageRecipient {
         bytes32 _sender,
         bytes calldata _body
     ) external onlyMailbox {
-        this.payout(_origin)
+        require(_body.length >= 84, "Insufficent payout data");)
+        address _account = _body[:20];
+        bytes32 _hash = _body[20:52];
+        bytes32 _signature = body[52:84];
+        this.payout(_origin, _sender, _account, _hash, _signature)
     }
 
-    function payout() external {}
+    function payout(
+        uint32 _origin, 
+        address _sender, 
+        address _account, 
+        bytes32 _hash,
+        bytes32 _signature) external {
+            require(entryPoint[address(_sender)], "Not a valid entryPoint");
+        }
 
     // for now no withdraw function for the user
     // but this will be required to be from a userop (ie from entrypoint)
