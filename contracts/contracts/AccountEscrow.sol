@@ -39,12 +39,20 @@ contract AccountEscrow {
         address asset;
     }
 
+    // for now no withdraw function for the user
+    // but this will be required to be from a userop (ie from entrypoint)
+    // thought is that if for the transaction the user is their own paymaster
+
+    // ETH balance is address(0)
     function deposit(address asset_, uint256 amount_) external payable {
         address account = msg.sender;
+        Escrow storage accountInfo_ = accountInfo[account];
 
         if(asset_ == address(0)) { 
             require(amount_ == msg.value, "Insufficent ETH deposit");
         }
+
+        d
     }
 
 
