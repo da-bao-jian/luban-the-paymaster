@@ -20,7 +20,6 @@ export default function Home() {
   const [account, setAccount] = useState<Presets.Builder.SimpleAccount | null>(
     null
   );
-  console.log("web3auth", web3auth)
 
   const [idToken, setIdToken] = useState<string | null>(null);
   const [privateKey, setPrivateKey] = useState<string | null>(null);
@@ -68,7 +67,7 @@ export default function Home() {
         await web3auth.initModal();
 
         setWeb3auth(web3auth);
-        setAuthorized(web3auth);
+        // setAuthorized(web3auth);
       } catch (error) {
         console.error(error);
       } finally {

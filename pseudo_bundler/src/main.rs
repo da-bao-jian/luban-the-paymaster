@@ -1,5 +1,6 @@
 mod bindings;
 mod utils;
+mod bundler;
 
 use env_logger::Env;
 fn main() {
