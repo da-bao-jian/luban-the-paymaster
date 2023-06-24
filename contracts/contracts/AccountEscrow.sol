@@ -55,5 +55,5 @@ contract AccountEscrow {
         d
     }
 
-
+    receive() external payable {}
 }
