@@ -20,23 +20,32 @@ contract AccountEscrow {
   */
 
 
-  mapping(address => Escrow) accountInfo;
 
-  struct Escrow {
-    uint256 freezeStart;
-    uint256 freezeStop;
-    uint256 nonce;
-    mapping(address => uint256) balance;
-    mapping(uint256 => Payment) history;
-  }
+    mapping(address => Escrow) accountInfo;
 
-  struct Payment {
-    uint256 timestamp;
-    uint256 assetAmount;
-    bytes32 domainId;
-    address from;
-    address asset;
-  }
+    struct Escrow {
+        uint256 freezeStart;
+        uint256 freezeStop;
+        uint256 nonce;
+        mapping(address => uint256) balance;
+        mapping(uint256 => Payment) history;
+    }
+
+    struct Payment {
+        uint256 timestamp;
+        uint256 assetAmount;
+        bytes32 domainId;
+        address from;
+        address asset;
+    }
+
+    function deposit(address asset_, uint256 amount_) external payable {
+        address account = msg.sender;
+
+        if(asset_ == address(0)) { 
+            require(amount_ == msg.value, "Insufficent ETH deposit");
+        }
+    }
 
 
 }
