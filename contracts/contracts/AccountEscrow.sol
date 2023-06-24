@@ -13,7 +13,22 @@ interface IERC20 {
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
 }
 
-contract AccountEscrow {
+interface IMessageRecipient {
+    /**
+     * @notice Handle an interchain message
+     * @param _origin Domain ID of the chain from which the message came
+     * @param _sender Address of the message sender on the origin chain as bytes32
+     * @param _body Raw bytes content of message body
+     */
+    function handle(
+        uint32 _origin,
+        bytes32 _sender,
+        bytes calldata _body
+    ) external;
+}
+
+
+contract AccountEscrow is IMessageRecipient {
 /** This escrow contract (Account Escrow) is a singleton contract
   * The purpose of this contract is to be the intermediary contract
   * for storing account funds (tokens and ETH) to bribe paymasters 
@@ -55,6 +70,23 @@ contract AccountEscrow {
         _;
         lock = false;
     }
+
+    address constant mailbox = 0x0E3239277501d215e17a4d31c487F86a425E110B;
+    // for access control on handle implementations
+    modifier onlyMailbox() {
+        require(msg.sender == mailbox);
+        _;    
+    }
+
+    function handle(
+        uint32 _origin,
+        bytes32 _sender,
+        bytes calldata _body
+    ) external onlyMailbox {
+        //
+    }
+
+    function payout() external {}
 
     // for now no withdraw function for the user
     // but this will be required to be from a userop (ie from entrypoint)
