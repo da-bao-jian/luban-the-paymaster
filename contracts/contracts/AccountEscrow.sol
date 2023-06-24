@@ -83,7 +83,7 @@ contract AccountEscrow is IMessageRecipient {
         bytes32 _sender,
         bytes calldata _body
     ) external onlyMailbox {
-        //
+        this.payout(_origin)
     }
 
     function payout() external {}
