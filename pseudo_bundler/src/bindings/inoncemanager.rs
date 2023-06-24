@@ -7,8 +7,9 @@ pub use inoncemanager::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types,
+    non_camel_case_types
 )]
+#[allow(clippy::all)]
 pub mod inoncemanager {
     const _: () = {
         ::core::include_bytes!(
@@ -18,8 +19,10 @@ pub mod inoncemanager {
     #[rustfmt::skip]
     const __ABI: &str = "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\",\"components\":[]},{\"internalType\":\"uint192\",\"name\":\"key\",\"type\":\"uint192\",\"components\":[]}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getNonce\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\",\"components\":[]}]},{\"inputs\":[{\"internalType\":\"uint192\",\"name\":\"key\",\"type\":\"uint192\",\"components\":[]}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"incrementNonce\",\"outputs\":[]}]";
     ///The parsed JSON ABI of the contract.
-    pub static INONCEMANAGER_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> = ::ethers::contract::Lazy::new(||
-    ::ethers::core::utils::__serde_json::from_str(__ABI).expect("ABI is always valid"));
+    pub static INONCEMANAGER_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
+        ::ethers::contract::Lazy::new(|| {
+            ::ethers::core::utils::__serde_json::from_str(__ABI).expect("ABI is always valid")
+        });
     pub struct inoncemanager<M>(::ethers::contract::Contract<M>);
     impl<M> ::core::clone::Clone for inoncemanager<M> {
         fn clone(&self) -> Self {
@@ -39,7 +42,9 @@ pub mod inoncemanager {
     }
     impl<M> ::core::fmt::Debug for inoncemanager<M> {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-            f.debug_tuple(stringify!(inoncemanager)).field(&self.address()).finish()
+            f.debug_tuple(stringify!(inoncemanager))
+                .field(&self.address())
+                .finish()
         }
     }
     impl<M: ::ethers::providers::Middleware> inoncemanager<M> {
@@ -49,13 +54,11 @@ pub mod inoncemanager {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(
-                ::ethers::contract::Contract::new(
-                    address.into(),
-                    INONCEMANAGER_ABI.clone(),
-                    client,
-                ),
-            )
+            Self(::ethers::contract::Contract::new(
+                address.into(),
+                INONCEMANAGER_ABI.clone(),
+                client,
+            ))
         }
         ///Calls the contract's `getNonce` (0x35567e1a) function
         pub fn get_nonce(
@@ -78,7 +81,8 @@ pub mod inoncemanager {
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for inoncemanager<M> {
+        for inoncemanager<M>
+    {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -92,7 +96,7 @@ pub mod inoncemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getNonce", abi = "getNonce(address,uint192)")]
     pub struct GetNonceCall {
@@ -108,7 +112,7 @@ pub mod inoncemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "incrementNonce", abi = "incrementNonce(uint192)")]
     pub struct IncrementNonceCall {
@@ -125,12 +129,12 @@ pub mod inoncemanager {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded)
-                = <GetNonceCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <GetNonceCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::GetNonce(decoded));
             }
-            if let Ok(decoded)
-                = <IncrementNonceCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) =
+                <IncrementNonceCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::IncrementNonce(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -139,12 +143,8 @@ pub mod inoncemanager {
     impl ::ethers::core::abi::AbiEncode for inoncemanagerCalls {
         fn encode(self) -> Vec<u8> {
             match self {
-                Self::GetNonce(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::IncrementNonce(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::GetNonce(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::IncrementNonce(element) => ::ethers::core::abi::AbiEncode::encode(element),
             }
         }
     }
@@ -175,7 +175,7 @@ pub mod inoncemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetNonceReturn {
         pub nonce: ::ethers::core::types::U256,

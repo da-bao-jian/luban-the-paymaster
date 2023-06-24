@@ -1,0 +1,12 @@
+[tasks.format]
+description = "Format code and run Clippy"
+workspace = false
+dependencies = ["format-rustfmt", "format-clippy"]
+
+[tasks.format-rustfmt]
+command = "cargo"
+args = ["fmt"]
+
+[tasks.format-clippy]
+command = "cargo"
+args = ["clippy", "--", "-D", "warnings"]

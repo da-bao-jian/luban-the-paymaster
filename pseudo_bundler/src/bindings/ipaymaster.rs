@@ -7,8 +7,9 @@ pub use ipaymaster::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types,
+    non_camel_case_types
 )]
+#[allow(clippy::all)]
 pub mod ipaymaster {
     const _: () = {
         ::core::include_bytes!(
@@ -18,8 +19,10 @@ pub mod ipaymaster {
     #[rustfmt::skip]
     const __ABI: &str = "[{\"inputs\":[{\"internalType\":\"enum IPaymaster.PostOpMode\",\"name\":\"mode\",\"type\":\"uint8\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"context\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"actualGasCost\",\"type\":\"uint256\",\"components\":[]}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"postOp\",\"outputs\":[]},{\"inputs\":[{\"internalType\":\"struct UserOperation\",\"name\":\"userOp\",\"type\":\"tuple\",\"components\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"initCode\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"callData\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"callGasLimit\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"verificationGasLimit\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"preVerificationGas\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"maxFeePerGas\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"maxPriorityFeePerGas\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"paymasterAndData\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\",\"components\":[]}]},{\"internalType\":\"bytes32\",\"name\":\"userOpHash\",\"type\":\"bytes32\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"maxCost\",\"type\":\"uint256\",\"components\":[]}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"validatePaymasterUserOp\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"context\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"validationData\",\"type\":\"uint256\",\"components\":[]}]}]";
     ///The parsed JSON ABI of the contract.
-    pub static IPAYMASTER_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> = ::ethers::contract::Lazy::new(||
-    ::ethers::core::utils::__serde_json::from_str(__ABI).expect("ABI is always valid"));
+    pub static IPAYMASTER_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
+        ::ethers::contract::Lazy::new(|| {
+            ::ethers::core::utils::__serde_json::from_str(__ABI).expect("ABI is always valid")
+        });
     pub struct ipaymaster<M>(::ethers::contract::Contract<M>);
     impl<M> ::core::clone::Clone for ipaymaster<M> {
         fn clone(&self) -> Self {
@@ -39,7 +42,9 @@ pub mod ipaymaster {
     }
     impl<M> ::core::fmt::Debug for ipaymaster<M> {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-            f.debug_tuple(stringify!(ipaymaster)).field(&self.address()).finish()
+            f.debug_tuple(stringify!(ipaymaster))
+                .field(&self.address())
+                .finish()
         }
     }
     impl<M: ::ethers::providers::Middleware> ipaymaster<M> {
@@ -49,13 +54,11 @@ pub mod ipaymaster {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(
-                ::ethers::contract::Contract::new(
-                    address.into(),
-                    IPAYMASTER_ABI.clone(),
-                    client,
-                ),
-            )
+            Self(::ethers::contract::Contract::new(
+                address.into(),
+                IPAYMASTER_ABI.clone(),
+                client,
+            ))
         }
         ///Calls the contract's `postOp` (0xa9a23409) function
         pub fn post_op(
@@ -83,8 +86,7 @@ pub mod ipaymaster {
                 .expect("method not found (this should never happen)")
         }
     }
-    impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for ipaymaster<M> {
+    impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>> for ipaymaster<M> {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -98,7 +100,7 @@ pub mod ipaymaster {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "postOp", abi = "postOp(uint8,bytes,uint256)")]
     pub struct PostOpCall {
@@ -115,7 +117,7 @@ pub mod ipaymaster {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "validatePaymasterUserOp",
@@ -137,14 +139,12 @@ pub mod ipaymaster {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded)
-                = <PostOpCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <PostOpCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::PostOp(decoded));
             }
-            if let Ok(decoded)
-                = <ValidatePaymasterUserOpCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) =
+                <ValidatePaymasterUserOpCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::ValidatePaymasterUserOp(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -164,9 +164,7 @@ pub mod ipaymaster {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
                 Self::PostOp(element) => ::core::fmt::Display::fmt(element, f),
-                Self::ValidatePaymasterUserOp(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::ValidatePaymasterUserOp(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
@@ -189,7 +187,7 @@ pub mod ipaymaster {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct ValidatePaymasterUserOpReturn {
         pub context: ::ethers::core::types::Bytes,
@@ -204,7 +202,7 @@ pub mod ipaymaster {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct UserOperation {
         pub sender: ::ethers::core::types::Address,

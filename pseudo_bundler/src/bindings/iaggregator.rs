@@ -7,8 +7,9 @@ pub use iaggregator::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types,
+    non_camel_case_types
 )]
+#[allow(clippy::all)]
 pub mod iaggregator {
     const _: () = {
         ::core::include_bytes!(
@@ -18,8 +19,10 @@ pub mod iaggregator {
     #[rustfmt::skip]
     const __ABI: &str = "[{\"inputs\":[{\"internalType\":\"struct UserOperation[]\",\"name\":\"userOps\",\"type\":\"tuple[]\",\"components\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"initCode\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"callData\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"callGasLimit\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"verificationGasLimit\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"preVerificationGas\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"maxFeePerGas\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"maxPriorityFeePerGas\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"paymasterAndData\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\",\"components\":[]}]}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"aggregateSignatures\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"aggregatedSignature\",\"type\":\"bytes\",\"components\":[]}]},{\"inputs\":[{\"internalType\":\"struct UserOperation[]\",\"name\":\"userOps\",\"type\":\"tuple[]\",\"components\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"initCode\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"callData\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"callGasLimit\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"verificationGasLimit\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"preVerificationGas\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"maxFeePerGas\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"maxPriorityFeePerGas\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"paymasterAndData\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\",\"components\":[]}]},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\",\"components\":[]}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"validateSignatures\",\"outputs\":[]},{\"inputs\":[{\"internalType\":\"struct UserOperation\",\"name\":\"userOp\",\"type\":\"tuple\",\"components\":[{\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"initCode\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"callData\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"callGasLimit\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"verificationGasLimit\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"preVerificationGas\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"maxFeePerGas\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"maxPriorityFeePerGas\",\"type\":\"uint256\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"paymasterAndData\",\"type\":\"bytes\",\"components\":[]},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\",\"components\":[]}]}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"validateUserOpSignature\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"sigForUserOp\",\"type\":\"bytes\",\"components\":[]}]}]";
     ///The parsed JSON ABI of the contract.
-    pub static IAGGREGATOR_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> = ::ethers::contract::Lazy::new(||
-    ::ethers::core::utils::__serde_json::from_str(__ABI).expect("ABI is always valid"));
+    pub static IAGGREGATOR_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
+        ::ethers::contract::Lazy::new(|| {
+            ::ethers::core::utils::__serde_json::from_str(__ABI).expect("ABI is always valid")
+        });
     pub struct iaggregator<M>(::ethers::contract::Contract<M>);
     impl<M> ::core::clone::Clone for iaggregator<M> {
         fn clone(&self) -> Self {
@@ -39,7 +42,9 @@ pub mod iaggregator {
     }
     impl<M> ::core::fmt::Debug for iaggregator<M> {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-            f.debug_tuple(stringify!(iaggregator)).field(&self.address()).finish()
+            f.debug_tuple(stringify!(iaggregator))
+                .field(&self.address())
+                .finish()
         }
     }
     impl<M: ::ethers::providers::Middleware> iaggregator<M> {
@@ -49,22 +54,17 @@ pub mod iaggregator {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(
-                ::ethers::contract::Contract::new(
-                    address.into(),
-                    IAGGREGATOR_ABI.clone(),
-                    client,
-                ),
-            )
+            Self(::ethers::contract::Contract::new(
+                address.into(),
+                IAGGREGATOR_ABI.clone(),
+                client,
+            ))
         }
         ///Calls the contract's `aggregateSignatures` (0x275e2d79) function
         pub fn aggregate_signatures(
             &self,
             user_ops: ::std::vec::Vec<UserOperation>,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Bytes,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Bytes> {
             self.0
                 .method_hash([39, 94, 45, 121], user_ops)
                 .expect("method not found (this should never happen)")
@@ -83,17 +83,13 @@ pub mod iaggregator {
         pub fn validate_user_op_signature(
             &self,
             user_op: UserOperation,
-        ) -> ::ethers::contract::builders::ContractCall<
-            M,
-            ::ethers::core::types::Bytes,
-        > {
+        ) -> ::ethers::contract::builders::ContractCall<M, ::ethers::core::types::Bytes> {
             self.0
                 .method_hash([100, 197, 48, 205], (user_op,))
                 .expect("method not found (this should never happen)")
         }
     }
-    impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for iaggregator<M> {
+    impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>> for iaggregator<M> {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -107,7 +103,7 @@ pub mod iaggregator {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "aggregateSignatures",
@@ -125,7 +121,7 @@ pub mod iaggregator {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "validateSignatures",
@@ -144,7 +140,7 @@ pub mod iaggregator {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(
         name = "validateUserOpSignature",
@@ -165,22 +161,19 @@ pub mod iaggregator {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded)
-                = <AggregateSignaturesCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) =
+                <AggregateSignaturesCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::AggregateSignatures(decoded));
             }
-            if let Ok(decoded)
-                = <ValidateSignaturesCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) =
+                <ValidateSignaturesCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::ValidateSignatures(decoded));
             }
-            if let Ok(decoded)
-                = <ValidateUserOpSignatureCall as ::ethers::core::abi::AbiDecode>::decode(
-                    data,
-                ) {
+            if let Ok(decoded) =
+                <ValidateUserOpSignatureCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::ValidateUserOpSignature(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -204,15 +197,9 @@ pub mod iaggregator {
     impl ::core::fmt::Display for iaggregatorCalls {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
             match self {
-                Self::AggregateSignatures(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::ValidateSignatures(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::ValidateUserOpSignature(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::AggregateSignatures(element) => ::core::fmt::Display::fmt(element, f),
+                Self::ValidateSignatures(element) => ::core::fmt::Display::fmt(element, f),
+                Self::ValidateUserOpSignature(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
     }
@@ -240,7 +227,7 @@ pub mod iaggregator {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct AggregateSignaturesReturn {
         pub aggregated_signature: ::ethers::core::types::Bytes,
@@ -254,7 +241,7 @@ pub mod iaggregator {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct ValidateUserOpSignatureReturn {
         pub sig_for_user_op: ::ethers::core::types::Bytes,
@@ -268,7 +255,7 @@ pub mod iaggregator {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct UserOperation {
         pub sender: ::ethers::core::types::Address,

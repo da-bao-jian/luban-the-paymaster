@@ -7,8 +7,9 @@ pub use istakemanager::*;
     clippy::upper_case_acronyms,
     clippy::type_complexity,
     dead_code,
-    non_camel_case_types,
+    non_camel_case_types
 )]
+#[allow(clippy::all)]
 pub mod istakemanager {
     const _: () = {
         ::core::include_bytes!(
@@ -18,8 +19,10 @@ pub mod istakemanager {
     #[rustfmt::skip]
     const __ABI: &str = "[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\",\"components\":[],\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"totalDeposit\",\"type\":\"uint256\",\"components\":[],\"indexed\":false}],\"type\":\"event\",\"name\":\"Deposited\",\"outputs\":[],\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\",\"components\":[],\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"totalStaked\",\"type\":\"uint256\",\"components\":[],\"indexed\":false},{\"internalType\":\"uint256\",\"name\":\"unstakeDelaySec\",\"type\":\"uint256\",\"components\":[],\"indexed\":false}],\"type\":\"event\",\"name\":\"StakeLocked\",\"outputs\":[],\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\",\"components\":[],\"indexed\":true},{\"internalType\":\"uint256\",\"name\":\"withdrawTime\",\"type\":\"uint256\",\"components\":[],\"indexed\":false}],\"type\":\"event\",\"name\":\"StakeUnlocked\",\"outputs\":[],\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\",\"components\":[],\"indexed\":true},{\"internalType\":\"address\",\"name\":\"withdrawAddress\",\"type\":\"address\",\"components\":[],\"indexed\":false},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\",\"components\":[],\"indexed\":false}],\"type\":\"event\",\"name\":\"StakeWithdrawn\",\"outputs\":[],\"anonymous\":false},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\",\"components\":[],\"indexed\":true},{\"internalType\":\"address\",\"name\":\"withdrawAddress\",\"type\":\"address\",\"components\":[],\"indexed\":false},{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\",\"components\":[],\"indexed\":false}],\"type\":\"event\",\"name\":\"Withdrawn\",\"outputs\":[],\"anonymous\":false},{\"inputs\":[{\"internalType\":\"uint32\",\"name\":\"_unstakeDelaySec\",\"type\":\"uint32\",\"components\":[]}],\"stateMutability\":\"payable\",\"type\":\"function\",\"name\":\"addStake\",\"outputs\":[]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\",\"components\":[]}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"balanceOf\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\",\"components\":[]}]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\",\"components\":[]}],\"stateMutability\":\"payable\",\"type\":\"function\",\"name\":\"depositTo\",\"outputs\":[]},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\",\"components\":[]}],\"stateMutability\":\"view\",\"type\":\"function\",\"name\":\"getDepositInfo\",\"outputs\":[{\"internalType\":\"struct IStakeManager.DepositInfo\",\"name\":\"info\",\"type\":\"tuple\",\"components\":[{\"internalType\":\"uint112\",\"name\":\"deposit\",\"type\":\"uint112\",\"components\":[]},{\"internalType\":\"bool\",\"name\":\"staked\",\"type\":\"bool\",\"components\":[]},{\"internalType\":\"uint112\",\"name\":\"stake\",\"type\":\"uint112\",\"components\":[]},{\"internalType\":\"uint32\",\"name\":\"unstakeDelaySec\",\"type\":\"uint32\",\"components\":[]},{\"internalType\":\"uint48\",\"name\":\"withdrawTime\",\"type\":\"uint48\",\"components\":[]}]}]},{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"unlockStake\",\"outputs\":[]},{\"inputs\":[{\"internalType\":\"address payable\",\"name\":\"withdrawAddress\",\"type\":\"address\",\"components\":[]}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"withdrawStake\",\"outputs\":[]},{\"inputs\":[{\"internalType\":\"address payable\",\"name\":\"withdrawAddress\",\"type\":\"address\",\"components\":[]},{\"internalType\":\"uint256\",\"name\":\"withdrawAmount\",\"type\":\"uint256\",\"components\":[]}],\"stateMutability\":\"nonpayable\",\"type\":\"function\",\"name\":\"withdrawTo\",\"outputs\":[]}]";
     ///The parsed JSON ABI of the contract.
-    pub static ISTAKEMANAGER_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> = ::ethers::contract::Lazy::new(||
-    ::ethers::core::utils::__serde_json::from_str(__ABI).expect("ABI is always valid"));
+    pub static ISTAKEMANAGER_ABI: ::ethers::contract::Lazy<::ethers::core::abi::Abi> =
+        ::ethers::contract::Lazy::new(|| {
+            ::ethers::core::utils::__serde_json::from_str(__ABI).expect("ABI is always valid")
+        });
     pub struct istakemanager<M>(::ethers::contract::Contract<M>);
     impl<M> ::core::clone::Clone for istakemanager<M> {
         fn clone(&self) -> Self {
@@ -39,7 +42,9 @@ pub mod istakemanager {
     }
     impl<M> ::core::fmt::Debug for istakemanager<M> {
         fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-            f.debug_tuple(stringify!(istakemanager)).field(&self.address()).finish()
+            f.debug_tuple(stringify!(istakemanager))
+                .field(&self.address())
+                .finish()
         }
     }
     impl<M: ::ethers::providers::Middleware> istakemanager<M> {
@@ -49,13 +54,11 @@ pub mod istakemanager {
             address: T,
             client: ::std::sync::Arc<M>,
         ) -> Self {
-            Self(
-                ::ethers::contract::Contract::new(
-                    address.into(),
-                    ISTAKEMANAGER_ABI.clone(),
-                    client,
-                ),
-            )
+            Self(::ethers::contract::Contract::new(
+                address.into(),
+                ISTAKEMANAGER_ABI.clone(),
+                client,
+            ))
         }
         ///Calls the contract's `addStake` (0x0396cb60) function
         pub fn add_stake(
@@ -121,66 +124,48 @@ pub mod istakemanager {
         ///Gets the contract's `Deposited` event
         pub fn deposited_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            DepositedFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, DepositedFilter> {
             self.0.event()
         }
         ///Gets the contract's `StakeLocked` event
         pub fn stake_locked_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            StakeLockedFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, StakeLockedFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `StakeUnlocked` event
         pub fn stake_unlocked_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            StakeUnlockedFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, StakeUnlockedFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `StakeWithdrawn` event
         pub fn stake_withdrawn_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            StakeWithdrawnFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, StakeWithdrawnFilter>
+        {
             self.0.event()
         }
         ///Gets the contract's `Withdrawn` event
         pub fn withdrawn_filter(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            WithdrawnFilter,
-        > {
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, WithdrawnFilter> {
             self.0.event()
         }
         /// Returns an `Event` builder for all the events of this contract.
         pub fn events(
             &self,
-        ) -> ::ethers::contract::builders::Event<
-            ::std::sync::Arc<M>,
-            M,
-            istakemanagerEvents,
-        > {
-            self.0.event_with_filter(::core::default::Default::default())
+        ) -> ::ethers::contract::builders::Event<::std::sync::Arc<M>, M, istakemanagerEvents>
+        {
+            self.0
+                .event_with_filter(::core::default::Default::default())
         }
     }
     impl<M: ::ethers::providers::Middleware> From<::ethers::contract::Contract<M>>
-    for istakemanager<M> {
+        for istakemanager<M>
+    {
         fn from(contract: ::ethers::contract::Contract<M>) -> Self {
             Self::new(contract.address(), contract.client())
         }
@@ -193,7 +178,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(name = "Deposited", abi = "Deposited(address,uint256)")]
     pub struct DepositedFilter {
@@ -209,7 +194,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(name = "StakeLocked", abi = "StakeLocked(address,uint256,uint256)")]
     pub struct StakeLockedFilter {
@@ -226,7 +211,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(name = "StakeUnlocked", abi = "StakeUnlocked(address,uint256)")]
     pub struct StakeUnlockedFilter {
@@ -242,9 +227,12 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
-    #[ethevent(name = "StakeWithdrawn", abi = "StakeWithdrawn(address,address,uint256)")]
+    #[ethevent(
+        name = "StakeWithdrawn",
+        abi = "StakeWithdrawn(address,address,uint256)"
+    )]
     pub struct StakeWithdrawnFilter {
         #[ethevent(indexed)]
         pub account: ::ethers::core::types::Address,
@@ -259,7 +247,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethevent(name = "Withdrawn", abi = "Withdrawn(address,address,uint256)")]
     pub struct WithdrawnFilter {
@@ -304,12 +292,8 @@ pub mod istakemanager {
             match self {
                 Self::DepositedFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::StakeLockedFilter(element) => ::core::fmt::Display::fmt(element, f),
-                Self::StakeUnlockedFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
-                Self::StakeWithdrawnFilter(element) => {
-                    ::core::fmt::Display::fmt(element, f)
-                }
+                Self::StakeUnlockedFilter(element) => ::core::fmt::Display::fmt(element, f),
+                Self::StakeWithdrawnFilter(element) => ::core::fmt::Display::fmt(element, f),
                 Self::WithdrawnFilter(element) => ::core::fmt::Display::fmt(element, f),
             }
         }
@@ -348,7 +332,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "addStake", abi = "addStake(uint32)")]
     pub struct AddStakeCall {
@@ -363,7 +347,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "balanceOf", abi = "balanceOf(address)")]
     pub struct BalanceOfCall {
@@ -378,7 +362,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "depositTo", abi = "depositTo(address)")]
     pub struct DepositToCall {
@@ -393,7 +377,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "getDepositInfo", abi = "getDepositInfo(address)")]
     pub struct GetDepositInfoCall {
@@ -408,7 +392,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "unlockStake", abi = "unlockStake()")]
     pub struct UnlockStakeCall;
@@ -421,7 +405,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "withdrawStake", abi = "withdrawStake(address)")]
     pub struct WithdrawStakeCall {
@@ -436,7 +420,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     #[ethcall(name = "withdrawTo", abi = "withdrawTo(address,uint256)")]
     pub struct WithdrawToCall {
@@ -459,32 +443,28 @@ pub mod istakemanager {
             data: impl AsRef<[u8]>,
         ) -> ::core::result::Result<Self, ::ethers::core::abi::AbiError> {
             let data = data.as_ref();
-            if let Ok(decoded)
-                = <AddStakeCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <AddStakeCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::AddStake(decoded));
             }
-            if let Ok(decoded)
-                = <BalanceOfCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <BalanceOfCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::BalanceOf(decoded));
             }
-            if let Ok(decoded)
-                = <DepositToCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <DepositToCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::DepositTo(decoded));
             }
-            if let Ok(decoded)
-                = <GetDepositInfoCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) =
+                <GetDepositInfoCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::GetDepositInfo(decoded));
             }
-            if let Ok(decoded)
-                = <UnlockStakeCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <UnlockStakeCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::UnlockStake(decoded));
             }
-            if let Ok(decoded)
-                = <WithdrawStakeCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <WithdrawStakeCall as ::ethers::core::abi::AbiDecode>::decode(data)
+            {
                 return Ok(Self::WithdrawStake(decoded));
             }
-            if let Ok(decoded)
-                = <WithdrawToCall as ::ethers::core::abi::AbiDecode>::decode(data) {
+            if let Ok(decoded) = <WithdrawToCall as ::ethers::core::abi::AbiDecode>::decode(data) {
                 return Ok(Self::WithdrawTo(decoded));
             }
             Err(::ethers::core::abi::Error::InvalidData.into())
@@ -493,27 +473,13 @@ pub mod istakemanager {
     impl ::ethers::core::abi::AbiEncode for istakemanagerCalls {
         fn encode(self) -> Vec<u8> {
             match self {
-                Self::AddStake(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::BalanceOf(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::DepositTo(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::GetDepositInfo(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::UnlockStake(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::WithdrawStake(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
-                Self::WithdrawTo(element) => {
-                    ::ethers::core::abi::AbiEncode::encode(element)
-                }
+                Self::AddStake(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::BalanceOf(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::DepositTo(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::GetDepositInfo(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::UnlockStake(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::WithdrawStake(element) => ::ethers::core::abi::AbiEncode::encode(element),
+                Self::WithdrawTo(element) => ::ethers::core::abi::AbiEncode::encode(element),
             }
         }
     }
@@ -574,7 +540,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct BalanceOfReturn(pub ::ethers::core::types::U256);
     ///Container type for all return fields from the `getDepositInfo` function with signature `getDepositInfo(address)` and selector `0x5287ce12`
@@ -586,7 +552,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct GetDepositInfoReturn {
         pub info: DepositInfo,
@@ -600,7 +566,7 @@ pub mod istakemanager {
         Debug,
         PartialEq,
         Eq,
-        Hash
+        Hash,
     )]
     pub struct DepositInfo {
         pub deposit: u128,
