@@ -1,6 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.12;
 
+interface IERC20 {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    function totalSupply() external view returns (uint256);
+    function balanceOf(address account) external view returns (uint256);
+    function transfer(address to, uint256 amount) external returns (bool);
+    function allowance(address owner, address spender) external view returns (uint256);
+    function approve(address spender, uint256 amount) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns (bool);
+}
+
 contract AccountEscrow {
 /** This escrow contract (Account Escrow) is a singleton contract
   * The purpose of this contract is to be the intermediary contract
@@ -18,9 +30,6 @@ contract AccountEscrow {
   * userop calldata has target address, original transactions data, and signature
   * to reconstruct the signer (ie signer == target)
   */
-
-
-
     mapping(address => Escrow) accountInfo;
 
     struct Escrow {
@@ -39,20 +48,32 @@ contract AccountEscrow {
         address asset;
     }
 
+    bool lock;
+    modifier locked() {
+        require(lock, "no reentry");
+        lock = true;
+        _;
+        lock = false;
+    }
+
     // for now no withdraw function for the user
     // but this will be required to be from a userop (ie from entrypoint)
     // thought is that if for the transaction the user is their own paymaster
 
     // ETH balance is address(0)
-    function deposit(address asset_, uint256 amount_) external payable {
+    function deposit(address asset_, uint256 amount_) external payable locked() {
         address account = msg.sender;
         Escrow storage accountInfo_ = accountInfo[account];
 
         if(asset_ == address(0)) { 
             require(amount_ == msg.value, "Insufficent ETH deposit");
+        } else {
+            require(IERC20(asset_).balanceOf(msg.sender) >= amount_, "Insufficent ERC20 balance");
         }
 
-        d
+        accountInfo_.freezeStart = block.timestamp;
+        accountInfo_.freezeStop = block.timestamp + 3600;
+        accountInfo_.balance[asset_] += amount_;
     }
 
     receive() external payable {}
