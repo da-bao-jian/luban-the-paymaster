@@ -53,8 +53,12 @@ export default function Home() {
       setLoading(true);
       try {
         const provider = new JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-        const network = await provider.getNetwork();
+        console.log("provider", provider);
+        let network = await provider.getNetwork().catch((e: any) => { console.log(e); });
+        network = await provider.getNetwork()
+        console.log("network", network);
         const chainId = network.chainId;
+        console.log("chainId", chainId);
         const web3auth = new Web3Auth({
           clientId: web3AuthClientId,
           web3AuthNetwork: "testnet",
@@ -68,7 +72,7 @@ export default function Home() {
         await web3auth.initModal();
 
         setWeb3auth(web3auth);
-        setAuthorized(web3auth);
+        //setAuthorized(web3auth);
       } catch (error) {
         console.error(error);
       } finally {
@@ -133,6 +137,33 @@ export default function Home() {
   const addEvent = (newEvent: string) => {
     setEvents((prevEvents) => [...prevEvents, newEvent]);
   };
+
+  // const sendTransaction = async (recipient: string, amount: string) => {
+  //   setEvents([]);
+  //   if (!account) {
+  //     throw new Error("Account not initialized");
+  //   }
+  //   addEvent("Sending transaction...");
+
+  //   const client = await Client.init(rpcUrl, entryPoint);
+
+  //   const target = getAddress(recipient);
+  //   const value = parseEther(amount);
+  //   const res = await client.sendUserOperation(
+  //     account.execute(target, value, "0x"),
+  //     {
+  //       onBuild: async (op) => {
+  //         addEvent(`Signed UserOperation: `);
+  //         addEvent(JSON.stringify(op, null, 2) as any);
+  //       },
+  //     }
+  //   );
+  //   addEvent(`UserOpHash: ${res.userOpHash}`);
+
+  //   addEvent("Waiting for transaction...");
+  //   const ev = await res.wait();
+  //   addEvent(`Transaction hash: ${ev?.transactionHash ?? null}`);
+  // };
 
   const sendTransaction = async (recipient: string, amount: string) => {
     setEvents([]);
