@@ -12,7 +12,7 @@ use jsonrpsee::{
     proc_macros::rpc,
     tracing::info,
     types::{
-        error::{CallError, ErrorCode},
+        error::ErrorCode,
         ErrorObject,
     },
 };
@@ -120,13 +120,20 @@ where
         let data = serde_json::value::to_raw_value(&"{\"a\": 100, \"b\": 200}").unwrap();
         println!("data: {:?}", data);
         // Ok(SendUserOperationResponse::Success(H256::default()));
-        Err(jsonrpsee::core::Error::Call(CallError::Custom(
-            ErrorObject::owned(
-                ErrorCode::ServerError(-32000).code(),
-                "Not implemented",
-                Some(data),
-            ),
-        )))
+	Err(
+		ErrorObject::owned(
+			ErrorCode::ServerError(-32000).code(),
+			"Not implemented",
+			Some(data),
+		)
+	)
+        // Err(jsonrpsee::core::Error::Call(CallError::Custom(
+        //     ErrorObject::owned(
+        //         ErrorCode::ServerError(-32000).code(),
+        //         "Not implemented",
+        //         Some(data),
+        //     ),
+        // )))
     }
 
     async fn estimate_user_operation_gas(

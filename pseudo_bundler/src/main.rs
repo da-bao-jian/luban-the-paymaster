@@ -14,6 +14,14 @@ use std::panic;
 use std::sync::Arc;
 use tokio;
 use dotenv::dotenv;
+use tower::ServiceBuilder;
+use std::future::pending;
+use jsonrpsee::{
+    server::ServerBuilder,
+    Methods
+};
+
+const RPC_ENDPOINT: &str = "127.0.0.1:3000";
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -68,13 +76,35 @@ async fn main() -> anyhow::Result<()> {
                 log::info!("Starting ERC-4337 AA Bundler");
 
                 let task = tokio::spawn(async move {
-                    loop {
-                        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-                        println!("Hello, world!");
-                    }
-                });
+                    log::info!("Starting RPC server");
 
+                    // let service = ServiceBuilder::new()
+                    //             .layer(ProxyJsonRpcLayer::new(mumbai_url.clone()));
+                    let server = ServerBuilder::new()
+                                // .set_middleware(service)
+                                .build(RPC_ENDPOINT)
+                                .await
+                                .map_err(|e| anyhow::anyhow!("Error starting server: {:?}", e))?;
+
+                    let mut methods = Methods::new();
+
+                    let _ = server.start(methods.clone())?;
+
+
+                    Ok::<(), anyhow::Error>(())
+                });
                 let _ = task.await;
+
+                let ctrl_c = tokio::signal::ctrl_c();
+                tokio::select! {
+                    _ = ctrl_c => {
+                        println!("Ctrl+C received, shutting down");
+                    }
+                    else => {
+                        println!("Server stopped unexpectedly");
+                    }
+                }
+
             });
         })?
         .join()
