@@ -39,4 +39,4 @@ next-env.d.ts
 .env
 
 #lock files
-package-lock.json
+/package-lock.json
