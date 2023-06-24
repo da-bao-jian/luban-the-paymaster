@@ -122,6 +122,12 @@ contract CrosschainPaymaster is BasePaymaster, UniswapHelper, OracleHelper {
     internal
     override
     returns (bytes memory context, uint256 validationResult) {unchecked {
+        uint32 goerliDomain         = 5;
+        address ethereumMailbox     = 0xCC737a94FecaeC165AbCf12dED095BB13F037685;
+        address accountEscrow        = 0x0000000000000000000000000000000000000000;
+        bytes memory bribeRequest   = 0;
+        IMailbox(ethereumMailbox).dispatch(goerliDomain, addressToBytes32(accountEscrow), bribeRequest);
+
             uint256 priceMarkup = tokenPaymasterConfig.priceMarkup;
             uint256 paymasterAndDataLength = userOp.paymasterAndData.length - 20;
             require(paymasterAndDataLength == 0 || paymasterAndDataLength == 32,
@@ -220,6 +226,12 @@ contract CrosschainPaymaster is BasePaymaster, UniswapHelper, OracleHelper {
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a < b ? a : b;
     }
+
+    // alignment preserving cast
+    function addressToBytes32(address _addr) internal pure returns (bytes32) {
+        return bytes32(uint256(uint160(_addr)));
+    }
+
 
     receive() external payable {
         emit Received(msg.sender, msg.value);
