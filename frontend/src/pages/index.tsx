@@ -4,6 +4,7 @@ import {
   getAddress,
   JsonRpcProvider,
   parseEther,
+  toBeHex,
   toQuantity,
   Wallet,
 } from "ethers";
@@ -174,9 +175,13 @@ export default function Home() {
 
     const client = await Client.init(rpcUrl, entryPoint);
 
+    const { ethers } = require('ethers');
     const target = getAddress(recipient);
     const value = parseEther(amount);
-    const res = await client.sendUserOperation(
+    account.setPaymasterAndData("0x1234567890")                   // we can edit parts of userop like so
+    let jsonrpcuserop = account.execute(target, value, "0x")      // this creates the userop
+    console.log("jsonrpcuserop", jsonrpcuserop)
+    const res = await client.sendUserOperation(                   // this actually sends op to set rpc
       account.execute(target, value, "0x"),
       {
         onBuild: async (op) => {
@@ -185,6 +190,7 @@ export default function Home() {
         },
       }
     );
+    console.log("asdfghjk");
     addEvent(`UserOpHash: ${res.userOpHash}`);
 
     addEvent("Waiting for transaction...");
