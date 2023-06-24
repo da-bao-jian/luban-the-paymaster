@@ -647,6 +647,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "dotenv"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
+
+[[package]]
 name = "dunce"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1027,6 +1033,7 @@ dependencies = [
  "bytes",
  "enr",
  "ethers-core",
+ "futures-channel",
  "futures-core",
  "futures-timer",
  "futures-util",
@@ -2316,12 +2323,14 @@ dependencies = [
  "aa-bundler-primitives",
  "anyhow",
  "async-trait",
+ "dotenv",
  "env_logger",
  "ethers",
  "jsonrpsee",
  "log",
  "serde",
  "serde_json",
+ "tokio",
 ]
 
 [[package]]

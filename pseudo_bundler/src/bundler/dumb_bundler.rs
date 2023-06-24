@@ -1,43 +1,65 @@
-use std::sync::Arc;
-use ethers::{
-    providers::{Middleware, Provider},
-    types::{Address, U64, U256},
-};
-use jsonrpsee::{
-	core::RpcResult, 
-	proc_macros::rpc,
-	tracing::info,
-	types::{
-		error::{CallError, ErrorCode},
-		ErrorObject
-	}
-};
 use aa_bundler_primitives::{
     UserOperation, UserOperationByHash, UserOperationGasEstimation, UserOperationHash,
     UserOperationPartial, UserOperationReceipt,
 };
 use async_trait::async_trait;
+use ethers::{
+    providers::{Middleware, Provider},
+    types::{Address, H160, U256, U64},
+};
+use jsonrpsee::{
+    core::RpcResult,
+    proc_macros::rpc,
+    tracing::info,
+    types::{
+        error::{CallError, ErrorCode},
+        ErrorObject,
+    },
+};
 use serde::{Deserialize, Serialize};
+use std::str::FromStr;
+use std::sync::Arc;
 
 /// A simplified bundler implementation based on AA-Bundler
 /// https://github.com/Vid201/aa-bundler
 pub struct DumbBundler<M: Middleware> {
+    /// The Provider that connects to Goerli
+    pub eth_provider: Arc<M>,
+    /// Goerli Chain ID
+    pub eth_chain_id: U64,
+    /// The Provider that connects to Mumbai
+    pub poly_provider: Arc<M>,
+    /// Mumbai Chain ID
+    pub poly_chain_id: U64,
+    /// Entry point address
+    pub entry_point: Address,
+    /// Max verification gas
+    pub max_verification_gas: U256,
+    /// Call gas Limit
+    pub call_gas_limit: U256,
+}
 
-	/// The Provider that connects to Goerli
-	pub eth_provider: Arc<M>,
-	/// Goerli Chain ID
-	pub eth_chain_id: U256,
-	/// The Provider that connects to Mumbai
-	pub poly_provider: Arc<M>,
-	/// Mumbai Chain ID
-	pub poly_chain_id: U256,
-	/// Entry point address
-	pub entry_point: Address,
-	/// Max verification gas
-	pub max_verification_gas: U256,
-	/// Call gas Limit
-	pub call_gas_limit: u64,
-
+impl<M> DumbBundler<M>
+where
+    M: Middleware + 'static,
+    M::Provider: Send + Sync + 'static,
+{
+    pub fn new(
+        eth_provider: Arc<M>,
+        poly_provider: Arc<M>,
+        max_verification_gas: U256,
+        call_gas_limit: U256,
+    ) -> Self {
+        Self {
+            eth_provider,
+            eth_chain_id: U64::from(5),
+            poly_provider,
+            poly_chain_id: U64::from(80001),
+            entry_point: H160::from_str("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789").unwrap(),
+            max_verification_gas,
+            call_gas_limit,
+        }
+    }
 }
 
 /// Eth API trait ported from AA-Bundler
@@ -75,11 +97,12 @@ pub trait EthApi {
 }
 
 #[async_trait]
-impl<M> EthApiServer for DumbBundler<M> 
-where M: Middleware + 'static,
-	M::Provider: Send + Sync,
+impl<M> EthApiServer for DumbBundler<M>
+where
+    M: Middleware + 'static,
+    M::Provider: Send + Sync,
 {
-	async fn chain_id(&self) -> RpcResult<U64> {
+    async fn chain_id(&self) -> RpcResult<U64> {
         Ok(U64::default())
     }
 
@@ -94,8 +117,9 @@ where M: Middleware + 'static,
     ) -> RpcResult<UserOperationHash> {
         info!("{:?}", user_operation);
         info!("{:?}", entry_point);
-        // Ok(SendUserOperationResponse::Success(H256::default()))
         let data = serde_json::value::to_raw_value(&"{\"a\": 100, \"b\": 200}").unwrap();
+        println!("data: {:?}", data);
+        // Ok(SendUserOperationResponse::Success(H256::default()));
         Err(jsonrpsee::core::Error::Call(CallError::Custom(
             ErrorObject::owned(
                 ErrorCode::ServerError(-32000).code(),
@@ -126,9 +150,4 @@ where M: Middleware + 'static,
         info!("{:?}", user_operation_hash);
         Ok(None)
     }
-
 }
-
-
-
-
