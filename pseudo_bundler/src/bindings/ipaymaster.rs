@@ -13,7 +13,7 @@ pub use ipaymaster::*;
 pub mod ipaymaster {
     const _: () = {
         ::core::include_bytes!(
-            "/home/harry/qi/eth-waterloo/pseudo_bundler/src/abi/IPaymaster.json"
+            "/home/harry/misc/eth-waterloo/pseudo_bundler/src/abi/IPaymaster.json"
         );
     };
     #[rustfmt::skip]

@@ -13,7 +13,7 @@ pub use ientrypoint::*;
 pub mod ientrypoint {
     const _: () = {
         ::core::include_bytes!(
-            "/home/harry/qi/eth-waterloo/pseudo_bundler/src/abi/IEntryPoint.json"
+            "/home/harry/misc/eth-waterloo/pseudo_bundler/src/abi/IEntryPoint.json"
         );
     };
     #[rustfmt::skip]

@@ -13,7 +13,7 @@ pub use inoncemanager::*;
 pub mod inoncemanager {
     const _: () = {
         ::core::include_bytes!(
-            "/home/harry/qi/eth-waterloo/pseudo_bundler/src/abi/INonceManager.json"
+            "/home/harry/misc/eth-waterloo/pseudo_bundler/src/abi/INonceManager.json"
         );
     };
     #[rustfmt::skip]

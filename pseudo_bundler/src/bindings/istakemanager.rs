@@ -13,7 +13,7 @@ pub use istakemanager::*;
 pub mod istakemanager {
     const _: () = {
         ::core::include_bytes!(
-            "/home/harry/qi/eth-waterloo/pseudo_bundler/src/abi/IStakeManager.json"
+            "/home/harry/misc/eth-waterloo/pseudo_bundler/src/abi/IStakeManager.json"
         );
     };
     #[rustfmt::skip]

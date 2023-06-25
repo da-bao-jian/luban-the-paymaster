@@ -13,7 +13,7 @@ pub use entrypointgoerli::*;
 pub mod entrypointgoerli {
     const _: () = {
         ::core::include_bytes!(
-            "/home/harry/qi/eth-waterloo/pseudo_bundler/src/abi/EntryPointGoerli.json"
+            "/home/harry/misc/eth-waterloo/pseudo_bundler/src/abi/EntryPointGoerli.json"
         );
     };
     #[rustfmt::skip]

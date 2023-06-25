@@ -27,7 +27,7 @@ async fn main() -> anyhow::Result<()> {
     env_logger::Builder::from_env(
             Env::default()
                     .default_filter_or("info")
-                    //.default_filter_or("trace")
+                    .default_filter_or("trace")
             ).init();
 
     // generate bindings
