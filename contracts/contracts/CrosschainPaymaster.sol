@@ -3,8 +3,8 @@ pragma solidity ^0.8.12;
 
 // Import the required libraries and contracts
 
-import "./aa/core/EntryPoint.sol";
-import "./aa/core/BasePaymaster.sol";
+import "./EntryPoint_flat.sol";
+import "./BasePaymaster_flat.sol";
 
 // SPDX-License-Identifier: MIT OR Apache-2.0
 pragma solidity >=0.6.11;
