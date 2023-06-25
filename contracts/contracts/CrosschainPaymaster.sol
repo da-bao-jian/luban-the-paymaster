@@ -97,12 +97,9 @@ contract CrosschainPaymaster is BasePaymaster {
     /// @param _owner The address that will be set as the owner of the contract.
     constructor(
         IEntryPoint _entryPoint,
-        TokenPaymasterConfig memory _tokenPaymasterConfig,
         address _owner
-    )
-    BasePaymaster(_entryPoint)
+    ) BasePaymaster(_entryPoint)
     {
-        setTokenPaymasterConfig(_tokenPaymasterConfig);
         transferOwnership(_owner);
     }
 
