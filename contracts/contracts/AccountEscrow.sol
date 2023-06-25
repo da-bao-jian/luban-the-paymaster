@@ -59,7 +59,7 @@ contract AccountEscrow is IMessageRecipient {
     struct Payment {
         uint256 timestamp;
         uint256 assetAmount;
-        bytes32 domainId;
+        uint32 domainId;
         bytes32 hashId; // tba for contenuity challenging
         address from;
         address asset;
@@ -85,20 +85,52 @@ contract AccountEscrow is IMessageRecipient {
         bytes32 _sender,
         bytes calldata _body
     ) external onlyMailbox {
-        require(_body.length >= 84, "Insufficent payout data");)
-        address _account = _body[:20];
-        bytes32 _hash = _body[20:52];
-        bytes32 _signature = body[52:84];
-        this.payout(_origin, _sender, _account, _hash, _signature)
+        require(_body.length >= 136, "Insufficent payout data");
+        address _account;
+        address _asset;
+        uint256 _amount;
+        bytes32 _hash;      // 0
+        bytes32 _signature; // 0
+        
+        (_account, _asset, _amount, _hash, _signature) = abi.decode(_body, (address, address, uint256, bytes32, bytes32));
+        address sender_;
+        assembly {
+            sender_ := _sender
+        }
+
+
+        this.payout(_origin, sender_, _account, _asset, _amount, _hash, _signature);
     }
 
     function payout(
         uint32 _origin, 
         address _sender, 
         address _account, 
+        address _asset,
+        uint256 _amount,
         bytes32 _hash,
         bytes32 _signature) external {
+            Escrow storage accountInfo_ = accountInfo[_account];
             require(entryPoint[address(_sender)], "Not a valid entryPoint");
+
+            // TODO: validate hash + sig == account
+            (_hash, _signature); 
+
+            // save withdrawl/payment history
+            accountInfo_.history[accountInfo_.nonce] = Payment(
+                block.timestamp,
+                _amount,
+                _origin,
+                0,
+                _sender,
+                _asset
+            );
+            accountInfo_.nonce++;
+            
+            if(_asset == address(0)) {
+                (bool success, ) = payable(_sender).call{value: _amount}("");
+                require(success); // managed before the execution occures and freeze times, but not implemented
+            }
         }
 
     // for now no withdraw function for the user
