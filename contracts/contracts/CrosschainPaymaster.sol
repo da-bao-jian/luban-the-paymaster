@@ -2,30 +2,14 @@
 pragma solidity ^0.8.12;
 
 // Import the required libraries and contracts
-import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
-import "../core/EntryPoint.sol";
-import "../core/BasePaymaster.sol";
-import "./utils/UniswapHelper.sol";
-import "./utils/OracleHelper.sol";
+import "./aa/core/EntryPoint.sol";
+import "./aa/core/BasePaymaster.sol";
 
-// TODO: note https://github.com/pimlicolabs/erc20-paymaster-contracts/issues/10
-// TODO: set a hard limit on how much gas a single user op may cost (postOp to fix the price)
-/// @title Sample ERC-20 Token Paymaster for ERC-4337
-/// @notice Based on Pimlico 'PimlicoERC20Paymaster' and OpenGSN 'PermitERC20UniswapV3Paymaster'
-/// This Paymaster covers gas fees in exchange for ERC20 tokens charged using allowance pre-issued by ERC-4337 accounts.
-/// The contract refunds excess tokens if the actual gas cost is lower than the initially provided amount.
-/// The token price cannot be queried in the validation code due to storage access restrictions of ERC-4337.
-/// The price is cached inside the contract and is updated in the 'postOp' stage if the change is >10%.
-/// It is theoretically possible the token has depreciated so much since the last 'postOp' the refund becomes negative.
-/// The contract reverts the inner user transaction in that case but keeps the charge.
-/// The contract also allows honest clients to prepay tokens at a higher price to avoid getting reverted.
-/// It also allows updating price configuration and withdrawing tokens by the contract owner.
-/// The contract uses an Oracle to fetch the latest token prices.
+/// @title ross-chain Paymaster for ERC-4337
+/// @notice Paymaster to send crosschain payments
 /// @dev Inherits from BasePaymaster.
-contract CrosschainPaymaster is BasePaymaster, UniswapHelper, OracleHelper {
+contract CrosschainPaymaster is BasePaymaster {
 
     struct TokenPaymasterConfig {
         /// @notice The price markup percentage applied to the token price (1e6 = 100%)
@@ -62,49 +46,16 @@ contract CrosschainPaymaster is BasePaymaster, UniswapHelper, OracleHelper {
     /// @ param _nativeAssetOracle The Oracle contract used to fetch the latest native asset (ETH, Matic, Avax, etc.) prices.
     /// @param _owner The address that will be set as the owner of the contract.
     constructor(
-        IERC20Metadata _token,
         IEntryPoint _entryPoint,
-        IERC20 _wrappedNative,
-        ISwapRouter _uniswap,
         TokenPaymasterConfig memory _tokenPaymasterConfig,
-        OracleHelperConfig memory _oracleHelperConfig,
-        UniswapHelperConfig memory _uniswapHelperConfig,
         address _owner
     )
-    BasePaymaster(
-    _entryPoint
-    )
-    OracleHelper(
-    _oracleHelperConfig
-    )
-    UniswapHelper(
-    _token,
-    _wrappedNative,
-    _uniswap,
-    10 ** _token.decimals(),
-    _uniswapHelperConfig
-    )
+    BasePaymaster(_entryPoint)
     {
         setTokenPaymasterConfig(_tokenPaymasterConfig);
         transferOwnership(_owner);
     }
 
-    /// @notice Updates the configuration for the Token Paymaster.
-    /// @param _tokenPaymasterConfig The new price markup percentage (1e6 = 100%).
-    function setTokenPaymasterConfig(
-        TokenPaymasterConfig memory _tokenPaymasterConfig
-    ) public onlyOwner {
-        require(_tokenPaymasterConfig.priceMarkup <= 2 * PRICE_DENOMINATOR, "TPM: price markup too high");
-        require(_tokenPaymasterConfig.priceMarkup >= PRICE_DENOMINATOR, "TPM: price markup too low");
-        tokenPaymasterConfig = _tokenPaymasterConfig;
-        emit ConfigUpdated(_tokenPaymasterConfig);
-    }
-
-    function setUniswapConfiguration(
-        UniswapHelperConfig memory _uniswapHelperConfig
-    ) external onlyOwner {
-        _setUniswapHelperConfiguration(_uniswapHelperConfig);
-    }
 
     /// @notice Allows the contract owner to withdraw a specified amount of tokens from the contract.
     /// @param to The address to transfer the tokens to.
@@ -122,85 +73,40 @@ contract CrosschainPaymaster is BasePaymaster, UniswapHelper, OracleHelper {
     internal
     override
     returns (bytes memory context, uint256 validationResult) {unchecked {
+        // send with hash and signature
+        require(paymasterAndDataLength == 0 || paymasterAndDataLength < 136,
+            "TPM: invalid data length"
+        );
+
+        // require domain 
+        // require assets address
+        // require payment amount (from chain A)
+
+        // TODO: validate data:
+        // address _account;
+        // address _asset;
+        // uint256 _amount;
+        // bytes calldata
+
+        bytes memory extractedData = new bytes(136);
+        for (uint256 i = 0; i < 136; i++) {
+            extractedData[i] = userOp.paymasterAndData[i + 20];
+        }
+
         uint32 goerliDomain         = 5;
         address ethereumMailbox     = 0xCC737a94FecaeC165AbCf12dED095BB13F037685;
         address accountEscrow        = 0x0000000000000000000000000000000000000000;
-        bytes memory bribeRequest   = 0;
+        bytes memory bribeRequest = abi.encodePacked(extractedData, userOp.callData);
         IMailbox(ethereumMailbox).dispatch(goerliDomain, addressToBytes32(accountEscrow), bribeRequest);
+    }}
 
-            uint256 priceMarkup = tokenPaymasterConfig.priceMarkup;
-            uint256 paymasterAndDataLength = userOp.paymasterAndData.length - 20;
-            require(paymasterAndDataLength == 0 || paymasterAndDataLength == 32,
-                "TPM: invalid data length"
-            );
-            uint256 preChargeNative = requiredPreFund + (tokenPaymasterConfig.refundPostopCost * userOp.maxFeePerGas);
-        // note: as price is in ether-per-token and we want more tokens increasing it means dividing it by markup
-            uint256 cachedPriceWithMarkup = cachedPrice * PRICE_DENOMINATOR / priceMarkup;
-            if (paymasterAndDataLength == 32) {
-                uint256 clientSuppliedPrice = uint256(bytes32(userOp.paymasterAndData[20 : 52]));
-                if (clientSuppliedPrice < cachedPriceWithMarkup) {
-                    // note: smaller number means 'more ether per token'
-                    cachedPriceWithMarkup = clientSuppliedPrice;
-                }
-            }
-            uint256 tokenAmount = weiToToken(preChargeNative, cachedPriceWithMarkup);
-            SafeERC20.safeTransferFrom(token, userOp.sender, address(this), tokenAmount);
-            context = abi.encode(tokenAmount, userOp.maxFeePerGas, userOp.maxPriorityFeePerGas, userOp.sender);
-            validationResult = _packValidationData(
-                false,
-                uint48(cachedPriceTimestamp + tokenPaymasterConfig.priceMaxAge),
-                0
-            );
-        }
-    }
-
-    /// @notice Performs post-operation tasks, such as updating the token price and refunding excess tokens.
+    /// @notice Performs post-operation tasks,
     /// @dev This function is called after a user operation has been executed or reverted.
     /// @param mode The post-operation mode (either successful or reverted).
     /// @param context The context containing the token amount and user sender address.
     /// @param actualGasCost The actual gas cost of the transaction.
     function _postOp(PostOpMode mode, bytes calldata context, uint256 actualGasCost) internal override {
-        unchecked {
-            uint256 priceMarkup = tokenPaymasterConfig.priceMarkup;
-            (
-                uint256 preCharge,
-                uint256 maxFeePerGas,
-                uint256 maxPriorityFeePerGas,
-                address userOpSender
-            ) = abi.decode(context, (uint256, uint256, uint256, address));
-            uint256 gasPrice = getGasPrice(maxFeePerGas, maxPriorityFeePerGas);
-            if (mode == PostOpMode.postOpReverted) {
-                emit PostOpReverted(userOpSender, preCharge);
-                // Do nothing here to not revert the whole bundle and harm reputation
-                return;
-            }
-            uint256 _cachedPrice = updateCachedPrice(false);
-        // note: as price is in ether-per-token and we want more tokens increasing it means dividing it by markup
-            uint256 cachedPriceWithMarkup = _cachedPrice * PRICE_DENOMINATOR / priceMarkup;
-        // Refund tokens based on actual gas cost
-            uint256 actualChargeNative = actualGasCost + tokenPaymasterConfig.refundPostopCost * gasPrice;
-            uint256 actualTokenNeeded = weiToToken(actualChargeNative, cachedPriceWithMarkup);
-            if (preCharge > actualTokenNeeded) {
-                // If the initially provided token amount is greater than the actual amount needed, refund the difference
-                SafeERC20.safeTransfer(
-                    token,
-                    userOpSender,
-                    preCharge - actualTokenNeeded
-                );
-            } else if (preCharge < actualTokenNeeded) {
-                // Attempt to cover Paymaster's gas expenses by withdrawing the 'overdraft' from the client
-                // If the transfer reverts also revert the 'postOp' to remove the incentive to cheat
-                SafeERC20.safeTransferFrom(
-                    token,
-                    userOpSender,
-                    address(this),
-                    actualTokenNeeded - preCharge
-                );
-            }
-
-            emit UserOperationSponsored(userOpSender, actualTokenNeeded, actualGasCost, _cachedPrice);
-            refillEntryPointDeposit(_cachedPrice);
-        }
+        // not nedded, but required to exist
     }
 
     /// @notice If necessary this function uses this Paymaster's token balance to refill the deposit on EntryPoint
