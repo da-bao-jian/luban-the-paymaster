@@ -12,9 +12,13 @@ async-trait = "0.1.68"
 dotenv = "0.15.0"
 env_logger = "0.10.0"
 ethers = { version = "2.0.7", features=["ws"] }
+hyper = "0.14.26"
 jsonrpsee = { version = "0.18.2", features = ["server", "macros"] }
 log = "0.4.19"
+reqwest = "0.11.18"
 serde = "1.0.164"
 serde_json = "1.0.97"
 tokio = "1.28.2"
 tower = "0.4.13"
+tracing-subscriber = "0.3.17"
+warp = "0.3.5"

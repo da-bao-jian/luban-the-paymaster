@@ -17,8 +17,10 @@ use crate::bundler::dumb_bundler::EthApiServer;
 use anyhow::Context;
 use jsonrpsee::{
     server::ServerBuilder,
-    Methods
 };
+use reqwest;
+use warp::Filter;
+
 
 const RPC_ENDPOINT: &str = "127.0.0.1:3001";
 
@@ -27,9 +29,12 @@ async fn main() -> anyhow::Result<()> {
     env_logger::Builder::from_env(
             Env::default()
                     .default_filter_or("info")
-                    .default_filter_or("trace")
+                    // .default_filter_or("trace")
             ).init();
 
+    if std::env::var("RUST_LOG").is_ok() {
+        tracing_subscriber::fmt::init();
+    }
     // generate bindings
     // utils::generate_bindings().unwrap();
 
@@ -47,7 +52,7 @@ async fn main() -> anyhow::Result<()> {
     log::info!("Connected to Goerli");
 
     let mumbai_provider = Arc::new(
-        Provider::<Ws>::connect(mumbai_url)
+        Provider::<Ws>::connect(mumbai_url.clone())
             .await
             .ok()
             .ok_or(anyhow::anyhow!("Error connecting to Mumbai"))?,
@@ -81,19 +86,63 @@ async fn main() -> anyhow::Result<()> {
                 let task = tokio::spawn(async move {
                     log::info!("Starting RPC server");
 
-                    // let service = ServiceBuilder::new()
-                    //             .layer(ProxyJsonRpcLayer::new(mumbai_url.clone()));
+                    let service = ServiceBuilder::new()
+                                .layer(bundler::middleware::ProxyJsonRpcLayer::new(mumbai_url.clone()));
                     let server = ServerBuilder::new()
-                                // .set_middleware(service)
+                                .set_middleware(service)
                                 .build(RPC_ENDPOINT)
                                 .await
                                 .map_err(|e| anyhow::anyhow!("Error starting server: {:?}", e)).unwrap();
 
-                    let methods = Methods::new();
-
                     log::info!("Started RPC server at {}", server.local_addr().unwrap());
 
                     let _handle = server.start(dummy.into_rpc()).unwrap();
+
+                     // Create a warp filter for CORS
+                    let cors = warp::cors()
+                        .allow_any_origin()
+                        .allow_methods(vec!["POST", "GET"])
+                        .allow_header("Content-Type");
+
+                    // Create a warp filter that forwards requests to jsonrpsee server
+                    let forward = warp::any()
+                        .and(warp::body::json())
+                        .and_then(move |body: serde_json::Value| async move{
+                            // Convert the body to a string
+                            let body_str = serde_json::to_string(&body).unwrap();
+
+                            // Create a new HTTP client
+                            let client = reqwest::Client::new();
+
+                            // Send the request to the jsonrpsee server
+                            let res = client.post("http://localhost:3001")
+                                .header("Content-Type", "application/json")
+                                .body(body_str)
+                                .send()
+                                .await
+                                .unwrap();
+
+                            // Convert the response back to JSON
+                            let json: serde_json::Value = res.json().await.unwrap_or_else(|e| {
+                                log::error!("Error converting response to JSON: {:?}", e);
+                                serde_json::json!({
+                                    "jsonrpc": "2.0",
+                                    "error": {
+                                        "code": -32603,
+                                        "message": "Internal error"
+                                    },
+                                    "id": body["id"]
+                                })
+                            });
+                            log::info!("Response from JSON-RPC server: {:?}", json);
+
+                            Ok::<warp::reply::Json, warp::Rejection>(warp::reply::json(&json))
+
+                        })
+                        .with(cors);
+
+                    // Start the warp server
+                    warp::serve(forward).run(([127, 0, 0, 1], 3002)).await;
 
                     loop {
                         let stopped = _handle.is_stopped();
