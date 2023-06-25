@@ -11,10 +11,7 @@ use jsonrpsee::{
     core::RpcResult,
     proc_macros::rpc,
     tracing::info,
-    types::{
-        error::ErrorCode,
-        ErrorObject,
-    },
+    types::{error::ErrorCode, ErrorObject},
 };
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
@@ -103,11 +100,11 @@ where
     M::Provider: Send + Sync,
 {
     async fn chain_id(&self) -> RpcResult<U64> {
-        Ok(U64::from(6969))
+        Ok(U64::from(80001))
     }
 
     async fn supported_entry_points(&self) -> RpcResult<Vec<Address>> {
-        Ok(vec![Address::default()])
+        Ok(vec![H160::from_str("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789").unwrap()])
     }
 
     async fn send_user_operation(
@@ -120,13 +117,11 @@ where
         let data = serde_json::value::to_raw_value(&"{\"a\": 100, \"b\": 200}").unwrap();
         println!("data: {:?}", data);
         // Ok(SendUserOperationResponse::Success(H256::default()));
-	Err(
-		ErrorObject::owned(
-			ErrorCode::ServerError(-32000).code(),
-			"Not implemented",
-			Some(data),
-		)
-	)
+        Err(ErrorObject::owned(
+            ErrorCode::ServerError(-32000).code(),
+            "Not implemented",
+            Some(data),
+        ))
     }
 
     async fn estimate_user_operation_gas(
@@ -142,90 +137,6 @@ where
             call_gas_limit: U256::from(self.call_gas_limit),
         })
     }
-
-    //     async fn estimate_user_operation_gas(
-    //     &self,
-    //     req: Request<EstimateUserOperationGasRequest>,
-    // ) -> Result<Response<EstimateUserOperationGasResponse>, Status> {
-    //     let req = req.into_inner();
-
-    //     let uo = parse_uo(req.uo)?;
-    //     let ep = parse_addr(req.ep)?;
-
-    //     let uo_pool = parse_uo_pool(self.get_uo_pool(&ep))?;
-
-    //     Ok(Response::new(
-    //         match uo_pool.estimate_user_operation_gas(&uo).await {
-    //             Ok(gas) => EstimateUserOperationGasResponse {
-    //                 res: EstimateUserOperationGasResult::Estimated as i32,
-    //                 data: serde_json::to_string(&gas).map_err(|err| {
-    //                     Status::internal(format!("Failed to serialize gas: {err}"))
-    //                 })?,
-    //             },
-    //             Err(err) => EstimateUserOperationGasResponse {
-    //                 res: EstimateUserOperationGasResult::NotEstimated as i32,
-    //                 data: serde_json::to_string(&err).map_err(|err| {
-    //                     Status::internal(format!("Failed to serialize error: {err}"))
-    //                 })?,
-    //             },
-    //         },
-    //     ))
-    // }
-
-
-    // pub async fn estimate_user_operation_gas(
-    //     &self,
-    //     uo: &UserOperation,
-    // ) -> Result<UserOperationGasEstimation, SimulationError> {
-    //     let sim_res = self.simulate_user_operation(uo, false).await?;
-
-    //     match self.entry_point.simulate_execution(uo.clone()).await {
-    //         Ok(_) => {}
-    //         Err(err) => {
-    //             return Err(match err {
-    //                 EntryPointErr::JsonRpcError(err) => SimulationError::Execution {
-    //                     message: err.message,
-    //                 },
-    //                 _ => SimulationError::UnknownError {
-    //                     message: format!("{err:?}"),
-    //                 },
-    //             })
-    //         }
-    //     }
-
-    //     let exec_res = match self.entry_point.simulate_handle_op(uo.clone()).await {
-    //         Ok(res) => res,
-    //         Err(err) => {
-    //             return Err(match err {
-    //                 EntryPointErr::JsonRpcError(err) => SimulationError::Execution {
-    //                     message: err.message,
-    //                 },
-    //                 _ => SimulationError::UnknownError {
-    //                     message: format!("{err:?}"),
-    //                 },
-    //             })
-    //         }
-    //     };
-
-    //     let base_fee_per_gas =
-    //         self.base_fee_per_gas()
-    //             .await
-    //             .map_err(|err| SimulationError::UnknownError {
-    //                 message: err.to_string(),
-    //             })?;
-    //     let call_gas_limit = calculate_call_gas_limit(
-    //         exec_res.paid,
-    //         exec_res.pre_op_gas,
-    //         uo.max_fee_per_gas
-    //             .min(uo.max_priority_fee_per_gas + base_fee_per_gas),
-    //     );
-
-    //     Ok(UserOperationGasEstimation {
-    //         pre_verification_gas: Overhead::default().calculate_pre_verification_gas(uo),
-    //         verification_gas_limit: sim_res.verification_gas_limit,
-    //         call_gas_limit,
-    //     })
-    // }
 
     async fn get_user_operation_receipt(
         &self,
