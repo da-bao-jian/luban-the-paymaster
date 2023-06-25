@@ -147,6 +147,7 @@ contract CrosschainPaymaster is BasePaymaster {
         //uint32 domain               = 5; // goerli
         uint32 domain               = 80001; // mumbai
         address ethereumMailbox     = 0xCC737a94FecaeC165AbCf12dED095BB13F037685; // same on all chains
+        address interchainPaymaster = 0xF90cB82a76492614D07B82a7658917f3aC811Ac1; // same on all chains
         address accountEscrow        = 0x0000000000000000000000000000000000000000;
         bytes32 dummyData;
         bytes memory bribeRequest = abi.encodePacked(
@@ -156,6 +157,10 @@ contract CrosschainPaymaster is BasePaymaster {
             userOp.callData
             );
         bytes32 messageId = IMailbox(ethereumMailbox).dispatch(goerliDomain, addressToBytes32(accountEscrow), bribeRequest);
+        uint256 gasQuote = IInterchainGasPaymaster(interchainPaymaster).quoteGasPayment(domain, 150000);
+        // TODO: change interchain gas payment to be surced from paymaster deposit
+        //      and for refund to return there as well
+        IInterchainGasPaymaster(interchainPaymaster).payForGas(messageId, domain, gasQuote, address(this)); // assumes funds directly on paymaster
         
     }}
 
