@@ -93,8 +93,10 @@ contract CrosschainPaymaster is BasePaymaster {
             extractedData[i] = userOp.paymasterAndData[i + 20];
         }
 
-        uint32 goerliDomain         = 5;
-        address ethereumMailbox     = 0xCC737a94FecaeC165AbCf12dED095BB13F037685;
+        // TODO: add the dmain to calldata
+        //uint32 domain               = 5; // goerli
+        uint32 domain               = 80001; // mumbai
+        address ethereumMailbox     = 0xCC737a94FecaeC165AbCf12dED095BB13F037685; // same on all chains
         address accountEscrow        = 0x0000000000000000000000000000000000000000;
         bytes memory bribeRequest = abi.encodePacked(extractedData, userOp.callData);
         IMailbox(ethereumMailbox).dispatch(goerliDomain, addressToBytes32(accountEscrow), bribeRequest);
