@@ -9,8 +9,7 @@ import {
   Wallet,
 } from "ethers";
 import { useEffect, useState } from "react";
-import { Client, Presets } from "userop";
-
+import { Client, Presets, IUserOperationBuilder,  ISendUserOperationOpts } from "userop";
 const entryPoint = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
 const simpleAccountFactory = "0x9406Cc6185a346906296840746125a0E44976454";
 const pmContext = {
@@ -21,6 +20,7 @@ export default function Home() {
   const [account, setAccount] = useState<Presets.Builder.SimpleAccount | null>(
     null
   );
+  console.log("account", account)
 
   const [idToken, setIdToken] = useState<string | null>(null);
   const [privateKey, setPrivateKey] = useState<string | null>(null);
@@ -30,7 +30,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
-  const pmUrl = process.env.NEXT_PUBLIC_PAYMASTER_URL;
   const web3AuthClientId = process.env.NEXT_PUBLIC_WEB3_AUTH_CLIENT_ID;
 
   if (!web3AuthClientId) {
@@ -41,13 +40,8 @@ export default function Home() {
     throw new Error("RPC_URL is undefined");
   }
 
-  if (!pmUrl) {
-    throw new Error("PAYMASTER_RPC_URL is undefined");
-  }
 
-  const paymaster = true
-    ? Presets.Middleware.verifyingPaymaster(pmUrl, pmContext)
-    : undefined;
+  const paymaster = undefined;
   useEffect(() => {
     const init = async () => {
       setLoading(true);
@@ -61,7 +55,7 @@ export default function Home() {
         console.log("chainId", chainId);
         const web3auth = new Web3Auth({
           clientId: web3AuthClientId,
-          web3AuthNetwork: "testnet",
+          web3AuthNetwork: "cyan",
           chainConfig: {
             chainNamespace: CHAIN_NAMESPACES.EIP155,
             chainId: toQuantity(chainId),
@@ -72,11 +66,7 @@ export default function Home() {
         await web3auth.initModal();
 
         setWeb3auth(web3auth);
-<<<<<<< HEAD
-        // setAuthorized(web3auth);
-=======
         //setAuthorized(web3auth);
->>>>>>> 175e7e1ff085a1a9dbe2cf98a115f36b92e8d0bd
       } catch (error) {
         console.error(error);
       } finally {
@@ -93,7 +83,6 @@ export default function Home() {
       rpcUrl,
       entryPoint,
       simpleAccountFactory,
-      paymaster
     );
   };
 
@@ -142,33 +131,6 @@ export default function Home() {
     setEvents((prevEvents) => [...prevEvents, newEvent]);
   };
 
-  // const sendTransaction = async (recipient: string, amount: string) => {
-  //   setEvents([]);
-  //   if (!account) {
-  //     throw new Error("Account not initialized");
-  //   }
-  //   addEvent("Sending transaction...");
-
-  //   const client = await Client.init(rpcUrl, entryPoint);
-
-  //   const target = getAddress(recipient);
-  //   const value = parseEther(amount);
-  //   const res = await client.sendUserOperation(
-  //     account.execute(target, value, "0x"),
-  //     {
-  //       onBuild: async (op) => {
-  //         addEvent(`Signed UserOperation: `);
-  //         addEvent(JSON.stringify(op, null, 2) as any);
-  //       },
-  //     }
-  //   );
-  //   addEvent(`UserOpHash: ${res.userOpHash}`);
-
-  //   addEvent("Waiting for transaction...");
-  //   const ev = await res.wait();
-  //   addEvent(`Transaction hash: ${ev?.transactionHash ?? null}`);
-  // };
-
   const sendTransaction = async (recipient: string, amount: string) => {
     setEvents([]);
     if (!account) {
@@ -176,7 +138,10 @@ export default function Home() {
     }
     addEvent("Sending transaction...");
 
+
+    let rpcUrl = "http://127.0.0.1:3002";
     const client = await Client.init(rpcUrl, entryPoint);
+    console.log("client", client)
 
     const { ethers } = require('ethers');
     const target = getAddress(recipient);
@@ -185,7 +150,7 @@ export default function Home() {
     let jsonrpcuserop = account.execute(target, value, "0x")      // this creates the userop
     console.log("jsonrpcuserop", jsonrpcuserop)
     const res = await client.sendUserOperation(                   // this actually sends op to set rpc
-      account.execute(target, value, "0x"),
+      account,
       {
         onBuild: async (op) => {
           addEvent(`Signed UserOperation: `);
