@@ -1,9 +1,7 @@
 mod bindings;
-mod bundler;
 mod utils;
+mod bundler;
 
-use anyhow;
-use anyhow::Context;
 use env_logger::Env;
 use ethers::{
     providers::{Provider, Ws},
@@ -15,17 +13,22 @@ use std::sync::Arc;
 use tokio;
 use dotenv::dotenv;
 use tower::ServiceBuilder;
-use std::future::pending;
+use crate::bundler::dumb_bundler::EthApiServer;
+use anyhow::Context;
 use jsonrpsee::{
     server::ServerBuilder,
     Methods
 };
 
-const RPC_ENDPOINT: &str = "127.0.0.1:3000";
+const RPC_ENDPOINT: &str = "127.0.0.1:3001";
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+    env_logger::Builder::from_env(
+            Env::default()
+                    .default_filter_or("info")
+                    //.default_filter_or("trace")
+            ).init();
 
     // generate bindings
     // utils::generate_bindings().unwrap();
@@ -84,17 +87,26 @@ async fn main() -> anyhow::Result<()> {
                                 // .set_middleware(service)
                                 .build(RPC_ENDPOINT)
                                 .await
-                                .map_err(|e| anyhow::anyhow!("Error starting server: {:?}", e))?;
+                                .map_err(|e| anyhow::anyhow!("Error starting server: {:?}", e)).unwrap();
 
-                    let mut methods = Methods::new();
+                    let methods = Methods::new();
 
-                    let _ = server.start(methods.clone())?;
+                    log::info!("Started RPC server at {}", server.local_addr().unwrap());
 
+                    let _handle = server.start(dummy.into_rpc()).unwrap();
 
-                    Ok::<(), anyhow::Error>(())
+                    loop {
+                        let stopped = _handle.is_stopped();
+                        log::info!("The server is running: {}", !stopped);
+                        tokio::time::sleep(tokio::time::Duration::from_secs(60)).await;
+                    }
+
+                    // Ok::<(), anyhow::Error>(())
                 });
                 let _ = task.await;
-
+                
+            });
+            rt.block_on(async {
                 let ctrl_c = tokio::signal::ctrl_c();
                 tokio::select! {
                     _ = ctrl_c => {
@@ -104,7 +116,6 @@ async fn main() -> anyhow::Result<()> {
                         println!("Server stopped unexpectedly");
                     }
                 }
-
             });
         })?
         .join()

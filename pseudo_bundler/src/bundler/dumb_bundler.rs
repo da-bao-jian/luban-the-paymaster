@@ -127,13 +127,6 @@ where
 			Some(data),
 		)
 	)
-        // Err(jsonrpsee::core::Error::Call(CallError::Custom(
-        //     ErrorObject::owned(
-        //         ErrorCode::ServerError(-32000).code(),
-        //         "Not implemented",
-        //         Some(data),
-        //     ),
-        // )))
     }
 
     async fn estimate_user_operation_gas(
