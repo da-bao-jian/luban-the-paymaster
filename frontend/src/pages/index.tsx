@@ -9,7 +9,7 @@ import {
   Wallet,
 } from "ethers";
 import { useEffect, useState } from "react";
-import { Client, Presets, IUserOperationBuilder,  ISendUserOperationOpts } from "userop";
+import { Client, Presets, DEFAULT_USER_OP, IUserOperation } from "userop";
 const entryPoint = "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789";
 const simpleAccountFactory = "0x9406Cc6185a346906296840746125a0E44976454";
 const pmContext = {
@@ -138,7 +138,6 @@ export default function Home() {
     }
     addEvent("Sending transaction...");
 
-
     let rpcUrl = "http://127.0.0.1:3002";
     const client = await Client.init(rpcUrl, entryPoint);
     console.log("client", client)
@@ -146,24 +145,16 @@ export default function Home() {
     const { ethers } = require('ethers');
     const target = getAddress(recipient);
     const value = parseEther(amount);
-    account.setPaymasterAndData("0x1234567890")                   // we can edit parts of userop like so
-    let jsonrpcuserop = account.execute(target, value, "0x")      // this creates the userop
-    console.log("jsonrpcuserop", jsonrpcuserop)
-    const res = await client.sendUserOperation(                   // this actually sends op to set rpc
-      account,
-      {
-        onBuild: async (op) => {
-          addEvent(`Signed UserOperation: `);
-          addEvent(JSON.stringify(op, null, 2) as any);
-        },
-      }
-    );
-    console.log("asdfghjk");
-    addEvent(`UserOpHash: ${res.userOpHash}`);
+    const defaultUserOp = DEFAULT_USER_OP;
+    defaultUserOp.sender = account.currOp.sender;
+    defaultUserOp.nonce = await account.getNonce();
+    defaultUserOp.initCode = "0x";
+    defaultUserOp.callData = account.currOp.callData;
+    defaultUserOp.paymasterAndData = "0x";
+    defaultUserOp.signature = account.currOp.signature;
+    console.log("defaultUserOp", defaultUserOp)
 
-    addEvent("Waiting for transaction...");
-    const ev = await res.wait();
-    addEvent(`Transaction hash: ${ev?.transactionHash ?? null}`);
+    let userOpHash = await client.provider.send("eth_sendUserOperation", [defaultUserOp, client.entryPoint.address]);
   };
 
   if (loading) {
