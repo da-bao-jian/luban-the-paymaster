@@ -74,7 +74,7 @@ contract CrosschainPaymaster is BasePaymaster {
     override
     returns (bytes memory context, uint256 validationResult) {unchecked {
         // send with hash and signature
-        require(paymasterAndDataLength == 0 || paymasterAndDataLength < 136,
+        require(paymasterAndDataLength == 0 || paymasterAndDataLength < 72,
             "TPM: invalid data length"
         );
 
@@ -88,8 +88,8 @@ contract CrosschainPaymaster is BasePaymaster {
         // uint256 _amount;
         // bytes calldata
 
-        bytes memory extractedData = new bytes(136);
-        for (uint256 i = 0; i < 136; i++) {
+        bytes memory extractedData = new bytes(72);
+        for (uint256 i = 0; i < 72; i++) {
             extractedData[i] = userOp.paymasterAndData[i + 20];
         }
 
@@ -98,7 +98,13 @@ contract CrosschainPaymaster is BasePaymaster {
         uint32 domain               = 80001; // mumbai
         address ethereumMailbox     = 0xCC737a94FecaeC165AbCf12dED095BB13F037685; // same on all chains
         address accountEscrow        = 0x0000000000000000000000000000000000000000;
-        bytes memory bribeRequest = abi.encodePacked(extractedData, userOp.callData);
+        bytes32 dummyData;
+        bytes memory bribeRequest = abi.encodePacked(
+            extractedData, // account, asset, amount
+            dummyData, // keccakHash of calldata, for proof
+            dummyData, // signature
+            userOp.callData
+            );
         IMailbox(ethereumMailbox).dispatch(goerliDomain, addressToBytes32(accountEscrow), bribeRequest);
     }}
 
