@@ -9,8 +9,43 @@ pragma solidity ^0.8.12;
 /* solhint-disable no-inline-assembly */
 
 
-import "./Helpers.sol";
 import "./UserOperation.sol";
+
+struct ValidationData {
+        address aggregator;
+        uint48 validAfter;
+        uint48 validUntil;
+    }
+
+//extract sigFailed, validAfter, validUntil.
+// also convert zero validUntil to type(uint48).max
+    function _parseValidationData(uint validationData) pure returns (ValidationData memory data) {
+        address aggregator = address(uint160(validationData));
+        uint48 validUntil = uint48(validationData >> 160);
+        if (validUntil == 0) {
+            validUntil = type(uint48).max;
+        }
+        uint48 validAfter = uint48(validationData >> (48 + 160));
+        return ValidationData(aggregator, validAfter, validUntil);
+    }
+
+// intersect account and paymaster ranges.
+    function _intersectTimeRange(uint256 validationData, uint256 paymasterValidationData) pure returns (ValidationData memory) {
+        ValidationData memory accountValidationData = _parseValidationData(validationData);
+        ValidationData memory pmValidationData = _parseValidationData(paymasterValidationData);
+        address aggregator = accountValidationData.aggregator;
+        if (aggregator == address(0)) {
+            aggregator = pmValidationData.aggregator;
+        }
+        uint48 validAfter = accountValidationData.validAfter;
+        uint48 validUntil = accountValidationData.validUntil;
+        uint48 pmValidAfter = pmValidationData.validAfter;
+        uint48 pmValidUntil = pmValidationData.validUntil;
+
+        if (validAfter < pmValidAfter) validAfter = pmValidAfter;
+        if (validUntil > pmValidUntil) validUntil = pmValidUntil;
+        return ValidationData(aggregator, validAfter, validUntil);
+    }
 
 interface IAccount {
 

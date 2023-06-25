@@ -6,7 +6,6 @@ pragma solidity ^0.8.12;
 /* solhint-disable no-inline-assembly */
 /* solhint-disable reason-string */
 
-import "./Helpers.sol";
 import "./UserOperation.sol";
 
 interface INonceManager {

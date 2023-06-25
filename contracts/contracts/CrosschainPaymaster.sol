@@ -3,11 +3,10 @@ pragma solidity ^0.8.12;
 
 // Import the required libraries and contracts
 
-import "./EntryPoint_flat.sol";
-import "./BasePaymaster_flat.sol";
-
-// SPDX-License-Identifier: MIT OR Apache-2.0
-pragma solidity >=0.6.11;
+import { EntryPoint } from "./EntryPoint_flat.sol";
+import { IEntryPoint, BasePaymaster } from "./BasePaymaster_flat.sol";
+import "./UserOperation.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title IInterchainGasPaymaster
@@ -56,6 +55,17 @@ interface IInterchainGasPaymaster {
         returns (uint256);
 }
 
+interface IMailbox {
+    function dispatch(
+        uint32 _destinationDomain,
+        bytes32 _recipientAddress,
+        bytes calldata _messageBody
+    ) external returns (bytes32);
+
+    function process(bytes calldata _metadata, bytes calldata _message)
+        external;
+}
+
 /// @title ross-chain Paymaster for ERC-4337
 /// @notice Paymaster to send crosschain payments
 /// @dev Inherits from BasePaymaster.
@@ -90,26 +100,16 @@ contract CrosschainPaymaster is BasePaymaster {
 
     // TODO: I don't like defaults in Solidity - accept ALL parameters of fail!!!
     /// @notice Initializes the PimlicoERC20Paymaster contract with the given parameters.
-    /// @param _token The ERC20 token used for transaction fee payments.
     /// @param _entryPoint The EntryPoint contract used in the Account Abstraction infrastructure.
-    /// @ param _tokenOracle The Oracle contract used to fetch the latest token prices.
-    /// @ param _nativeAssetOracle The Oracle contract used to fetch the latest native asset (ETH, Matic, Avax, etc.) prices.
     /// @param _owner The address that will be set as the owner of the contract.
     constructor(
-        IEntryPoint _entryPoint,
+        address _entryPoint,
         address _owner
-    ) BasePaymaster(_entryPoint)
+    ) BasePaymaster(IEntryPoint(_entryPoint))
     {
         transferOwnership(_owner);
     }
 
-
-    /// @notice Allows the contract owner to withdraw a specified amount of tokens from the contract.
-    /// @param to The address to transfer the tokens to.
-    /// @param amount The amount of tokens to transfer.
-    function withdrawToken(address to, uint256 amount) external onlyOwner {
-        SafeERC20.safeTransfer(token, to, amount);
-    }
 
     /// @notice Validates a paymaster user operation and calculates the required token amount for the transaction.
     /// @param userOp The user operation data.
@@ -121,6 +121,7 @@ contract CrosschainPaymaster is BasePaymaster {
     override
     returns (bytes memory context, uint256 validationResult) {unchecked {
         // send with hash and signature
+        uint256 paymasterAndDataLength = userOp.paymasterAndData.length;
         require(paymasterAndDataLength == 0 || paymasterAndDataLength < 72,
             "TPM: invalid data length"
         );
@@ -153,7 +154,7 @@ contract CrosschainPaymaster is BasePaymaster {
             dummyData, // signature
             userOp.callData
             );
-        bytes32 messageId = IMailbox(ethereumMailbox).dispatch(goerliDomain, addressToBytes32(accountEscrow), bribeRequest);
+        bytes32 messageId = IMailbox(ethereumMailbox).dispatch(domain, addressToBytes32(accountEscrow), bribeRequest);
         uint256 gasQuote = IInterchainGasPaymaster(interchainPaymaster).quoteGasPayment(domain, 150000);
         // TODO: change interchain gas payment to be surced from paymaster deposit
         //      and for refund to return there as well
@@ -168,18 +169,6 @@ contract CrosschainPaymaster is BasePaymaster {
     /// @param actualGasCost The actual gas cost of the transaction.
     function _postOp(PostOpMode mode, bytes calldata context, uint256 actualGasCost) internal override {
         // not nedded, but required to exist
-    }
-
-    /// @notice If necessary this function uses this Paymaster's token balance to refill the deposit on EntryPoint
-    function refillEntryPointDeposit(uint256 _cachedPrice) private {
-        uint256 currentEntryPointBalance = entryPoint.balanceOf(address(this));
-        if (
-            currentEntryPointBalance < tokenPaymasterConfig.minEntryPointBalance
-        ) {
-            uint256 swappedWeth = _maybeSwapTokenToWeth(token, _cachedPrice);
-            unwrapWeth(swappedWeth);
-            entryPoint.depositTo{value: address(this).balance}(address(this));
-        }
     }
 
     function getGasPrice(uint256 maxFeePerGas, uint256 maxPriorityFeePerGas) internal view returns (uint256) {
