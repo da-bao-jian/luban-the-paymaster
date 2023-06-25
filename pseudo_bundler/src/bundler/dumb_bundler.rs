@@ -1,17 +1,16 @@
+use crate::bindings::entrypointgoerli::entrypointgoerli;
 use aa_bundler_primitives::{
     UserOperation, UserOperationByHash, UserOperationGasEstimation, UserOperationHash,
-    UserOperationPartial, UserOperationReceipt, Wallet
+    UserOperationPartial, UserOperationReceipt, Wallet,
 };
-use crate::bindings::entrypointgoerli::entrypointgoerli;
-use std::time::Duration;
+use anyhow::Result;
 use async_trait::async_trait;
 use ethers::{
     prelude::SignerMiddleware,
     providers::{Middleware, Provider},
-    types::{Address, H160, U256, U64, transaction::eip2718::TypedTransaction},
-    signers::Signer
+    signers::Signer,
+    types::{transaction::eip2718::TypedTransaction, Address, H160, U256, U64},
 };
-use anyhow::Result;
 use jsonrpsee::{
     core::RpcResult,
     proc_macros::rpc,
@@ -21,6 +20,7 @@ use jsonrpsee::{
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use std::sync::Arc;
+use std::time::Duration;
 
 /// A simplified bundler implementation based on AA-Bundler
 /// https://github.com/Vid201/aa-bundler
@@ -53,7 +53,7 @@ where
         poly_provider: Arc<M>,
         max_verification_gas: U256,
         call_gas_limit: U256,
-        wallet: Wallet
+        wallet: Wallet,
     ) -> Self {
         Self {
             eth_provider,
@@ -66,9 +66,7 @@ where
             wallet,
         }
     }
-
 }
-
 
 /// Eth API trait ported from AA-Bundler
 ///  https://github.com/Vid201/aa-bundler/blob/main/crates/rpc/src/eth_api.rs
@@ -115,7 +113,10 @@ where
     }
 
     async fn supported_entry_points(&self) -> RpcResult<Vec<Address>> {
-        Ok(vec![H160::from_str("0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789").unwrap()])
+        Ok(vec![H160::from_str(
+            "0x5FF137D4b0FDCD49DcA30c7CF57E578a026d2789",
+        )
+        .unwrap()])
     }
 
     async fn send_user_operation(
@@ -123,23 +124,24 @@ where
         user_operation: UserOperation,
         entry_point: Address,
     ) -> RpcResult<UserOperationHash> {
-
         let wallet = Arc::new(SignerMiddleware::new(
             self.poly_provider.clone(),
-            self.wallet.signer.clone(),    
+            self.wallet.signer.clone(),
         ));
 
-        let entry_point_instance = entrypointgoerli::entrypointgoerli::new(entry_point, wallet.clone());
+        let entry_point_instance =
+            entrypointgoerli::entrypointgoerli::new(entry_point, wallet.clone());
 
-        let nonce = wallet.clone().get_transaction_count(self.wallet.signer.address(), None).await.unwrap();
+        let nonce = wallet
+            .clone()
+            .get_transaction_count(self.wallet.signer.address(), None)
+            .await
+            .unwrap();
 
         let mut user_op_vec = Vec::new();
         user_op_vec.push(user_operation.clone());
         let mut tx: TypedTransaction = entry_point_instance
-            .handle_ops(
-                user_op_vec,
-                self.wallet.signer.address(),
-            )
+            .handle_ops(user_op_vec, self.wallet.signer.address())
             .tx
             .clone();
         tx.set_nonce(nonce).set_chain_id(U64::from(80001));
@@ -152,7 +154,6 @@ where
         let tx_hash = tx.tx_hash();
 
         return Ok(UserOperationHash(tx_hash));
-
     }
 
     async fn estimate_user_operation_gas(

@@ -2,28 +2,27 @@ mod bindings;
 mod bundler;
 mod utils;
 
+use crate::bundler::dumb_bundler::EthApiServer;
 use aa_bundler_primitives::{
     UserOperation, UserOperationByHash, UserOperationGasEstimation, UserOperationHash,
-    UserOperationPartial, UserOperationReceipt, Wallet
+    UserOperationPartial, UserOperationReceipt, Wallet,
 };
-use std::str::FromStr;
-use crate::bundler::dumb_bundler::EthApiServer;
-use expanded_pathbuf::ExpandedPathBuf;
 use anyhow::Context;
 use dotenv::dotenv;
 use env_logger::Env;
 use ethers::{
     providers::{Provider, Ws},
-    types::{U64, H160, U256},
+    types::{H160, U256, U64},
 };
+use expanded_pathbuf::ExpandedPathBuf;
 use jsonrpsee::server::ServerBuilder;
 use reqwest;
 use std::env;
 use std::panic;
+use std::str::FromStr;
 use std::sync::Arc;
 use tower::ServiceBuilder;
 use warp::Filter;
-
 
 const RPC_ENDPOINT: &str = "127.0.0.1:3001";
 
@@ -66,14 +65,15 @@ async fn main() -> anyhow::Result<()> {
         panic!("Please set the FLASHBOTS_IDENTIFIER environment variable");
     });
 
-
     let _wallet = env::var("PRIVATE_KEY_PATH").unwrap_or_else(|e| {
         panic!("Please set the PRIVATE_KEY_PATH environment variable");
     });
-    let wallet = Wallet::from_file(ExpandedPathBuf::from_str(&_wallet.clone()).unwrap(), &U256::from(80001)).unwrap();
+    let wallet = Wallet::from_file(
+        ExpandedPathBuf::from_str(&_wallet.clone()).unwrap(),
+        &U256::from(80001),
+    )
+    .unwrap();
     log::info!("{:?}", wallet.signer);
-
-
 
     let dummy = bundler::dumb_bundler::DumbBundler::new(
         goerli_provider.clone(),
