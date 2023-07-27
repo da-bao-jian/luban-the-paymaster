@@ -2497,6 +2497,7 @@ dependencies = [
  "dotenv",
  "env_logger",
  "ethers",
+ "expanded-pathbuf",
  "hyper",
  "jsonrpsee",
  "log",

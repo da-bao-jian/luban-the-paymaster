@@ -18,7 +18,7 @@ Now, if you know what you're doing, you would:
 
 But what if I told you, you could skip all these steps? What if you could teleport from Ethereum to Polygon in a single transaction? What if you could do it in the time it takes to make a regular transaction? And what if you didn't even need a wallet on Polygon?
 
-Luban the Paymaster, your cross-chain fairy godmother. With a wave of his magic wand, he helps you get from chain A to chain B within seconds. No bridges, no waiting, no hassle.
+Luban the Paymaster, your cross-chain fairy godfather. With a wave of his magic wand, he helps you get from chain A to chain B within seconds. No bridges, no waiting, no hassle.
 
 # How Luban works? 
 ![Capture](https://github.com/da-bao-jian/eth-waterloo/assets/63417973/232b809f-43a7-45e9-a870-76c19e03b5b1)

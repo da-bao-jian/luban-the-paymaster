@@ -48290,10 +48290,11 @@ pub mod entrypointgoerli {
                 .method_hash([75, 29, 124, 245], (ops_per_aggregator, beneficiary))
                 .expect("method not found (this should never happen)")
         }
+
         ///Calls the contract's `handleOps` (0x1fad948c) function
         pub fn handle_ops(
             &self,
-            ops: ::std::vec::Vec<UserOperation>,
+            ops: ::std::vec::Vec<aa_bundler_primitives::UserOperation>,
             beneficiary: ::ethers::core::types::Address,
         ) -> ::ethers::contract::builders::ContractCall<M, ()> {
             self.0
